@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-4">
+        <div class="card shadow">
+          <div class="card-body">
+            <h3 class="card-title text-center mb-4">Login</h3>
+            <form id="loginForm">
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+              </div>
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Login</button>
+              </div>
+            </form>
+            <div class="text-center mt-3">
+              <p>New user? <button id="signupButton" class="btn btn-link p-0" style="text-decoration: none;">Sign up</button></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Handle login form submission
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent form submission
+
+      // Collect form data
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const data = { email, password };
+
+      // Make Axios POST request to login API
+      axios.post('http://localhost:3000/user/login', data)
+        .then(response => {
+            const token = response.data.token;
+            const userName = response.data.name;
+            if(response.data.isAdmin){
+              localStorage.setItem("isAdmin","true")
+            }
+            else{
+              localStorage.removeItem('isAdmin')
+            }
+            localStorage.setItem("token" ,token)
+            localStorage.setItem("username",userName)
+            console.log(token)
+            if(token){
+                window.location.href = "/salon.html"
+            } 
+            else{
+                alert(`${response.data.message}`)
+                window.location.href = "/chat.html"
+
+            }
+        })
+        .catch(error => {
+          console.log(error);
+          alert(`${error.response.data.message}`);
+        });
+    });
+
+    // Handle signup button click
+    document.getElementById('signupButton').addEventListener('click', function() {
+      window.location.href = '/signup.html'; // Redirect to signup page
+    });
+  </script>
+</body>
+</html>

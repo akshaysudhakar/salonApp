@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Appointment</title>
+</head>
+<body>
+  <h1>Book Your Appointment</h1>
+
+  <!-- Service Name -->
+  <p id="selected-service">Service: </p>
+
+  <!-- Stylist Dropdown -->
+  <label for="stylist">Select Stylist:</label>
+  <select id="stylist">
+    <option value="">--Choose Stylist--</option>
+    <!-- Options populated dynamically -->
+  </select>
+
+  <!-- Date Input -->
+  <label for="date">Select Date:</label>
+  <input type="date" id="date">
+
+  <!-- Time Slot Dropdown -->
+  <div id="time-slot-container" style="display: none;">
+    <label for="time-slot">Select Time Slot:</label>
+    <select id="time-slot">
+      <option value="">--Choose Time Slot--</option>
+      <!-- Options populated dynamically -->
+    </select>
+  </div>
+
+  <!-- Book Button -->
+  <button id="book-appointment" style="display: none;">Book Appointment</button>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const selectedServiceElement = document.getElementById('selected-service');
+      const stylistDropdown = document.getElementById('stylist');
+      const dateInput = document.getElementById('date');
+      const timeSlotDropdown = document.getElementById('time-slot');
+      const timeSlotContainer = document.getElementById('time-slot-container');
+      const bookButton = document.getElementById('book-appointment');
+
+      const token = localStorage.getItem('token');
+      var stripe = Stripe('pk_test_51PzdsuLT6WvY2uR5fTptUSpA7hAl2oDyY7LPLLBwOOWZMazGU4g7Z4RMxrOpNGP9Ah3ZdJISNgIEGT0N3fUwsl8a005ADMPAvn'); 
+
+      // Get service name from query parameter
+      const params = new URLSearchParams(window.location.search);
+      const serviceName = params.get('serviceName');
+      const servicePrice = params.get('servicePrice');
+      if (serviceName) {
+        selectedServiceElement.textContent += serviceName;
+      } else {
+        alert('No service selected! Redirecting...');
+        window.location.href = 'salon.html'; // Redirect to services page
+      }
+
+      // Step 1: Populate stylists dropdown (dummy or via API)
+      axios.post('http://localhost:3000/user/getStylists', { serviceName }, { headers: { "authorisation": token } })
+        .then(response => {
+          const stylists = response.data.staffsAvailable.staffs;
+          console.log(response.data)
+          stylists.forEach(stylist => {
+            const option = document.createElement('option');
+            option.value = stylist.name;
+            option.textContent = stylist.name;
+            stylistDropdown.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching stylists:', error);
+          alert('Failed to load stylists. Try again later.');
+        });
+
+      // Step 2: Handle stylist or date selection
+      function handleStylistOrDateSelection() {
+        const stylistName = stylistDropdown.value;
+        const selectedDate = dateInput.value;
+
+        if (!stylistName || !selectedDate) {
+          timeSlotContainer.style.display = 'none';
+          bookButton.style.display = 'none';
+          return;
+        }
+
+        // Fetch available time slots for the selected stylist and date
+        axios.post('http://localhost:3000/user/getStylistsSlots',{date: selectedDate, stylist :stylistName }, { headers: { "authorisation": token } })
+          .then(response => {
+            console.log(response.data)
+            const bookedSlots = response.data; // Example: ["11:00 AM", "2:00 PM", "3:00 PM"]
+            const allSlots = [];
+            const startTime = 11; // Starting hour (11 AM)
+            const endTime = 22; // Ending hour (10 PM)
+
+            // Generate all slots from 11 AM to 10 PM (1-hour intervals)
+            for (let hour = startTime; hour < endTime; hour++) {
+              if (hour === 13) continue; // Skip 1 PM to 2 PM (Lunch hour)
+              const slot = `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
+              if (!bookedSlots.includes(slot)) { // Include only if not in booked slots
+                allSlots.push(slot);
+              }
+            }
+
+            // Populate dropdown with available slots
+            timeSlotDropdown.innerHTML = '<option value="">--Choose Time Slot--</option>';
+            allSlots.forEach(slot => {
+              const option = document.createElement('option');
+              option.value = slot;
+              option.textContent = slot;
+              timeSlotDropdown.appendChild(option);
+            });
+
+            timeSlotContainer.style.display = 'block';
+            bookButton.style.display = 'none';
+          })
+          .catch(error => {
+            console.error('Error fetching slots:', error);
+            alert('Failed to load time slots. Try again later.');
+          });
+      }
+
+      stylistDropdown.addEventListener('change', handleStylistOrDateSelection);
+      dateInput.addEventListener('change', handleStylistOrDateSelection);
+
+      // Step 3: Handle time slot selection
+      timeSlotDropdown.addEventListener('change', () => {
+        if (timeSlotDropdown.value) {
+          bookButton.style.display = 'block';
+        } else {
+          bookButton.style.display = 'none';
+        }
+      });
+
+      // Step 4: Handle book appointment
+      bookButton.addEventListener('click', () => {
+        const stylistName = stylistDropdown.value;
+        const timeSlot = timeSlotDropdown.value;
+        const date = dateInput.value;
+
+        if (!stylistName || !timeSlot || !date) {
+          alert('Please select a stylist, date and time slot.');
+          return;
+        }
+
+        // Make API call to book appointment
+        axios.post('http://localhost:3000/appointment/bookAppointment',{date,serviceName,stylistName,servicePrice,timeSlot}, { headers: { "authorisation": token } })
+          .then((response) => {
+            console.log(response.data);
+            const sessionId = response.data.sessionId;
+            return stripe.redirectToCheckout({ sessionId: sessionId });
+          })
+          .catch(error => {
+            console.error('Error booking appointment:', error);
+            alert('Failed to book appointment. Try again later.');
+          });
+      });
+    });
+  </script>
+</body>
+</html>

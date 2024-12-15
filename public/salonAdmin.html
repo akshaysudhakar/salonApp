@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salon Admin</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
+</head>
+<body>
+  <div class="container my-5">
+    <h1 class="text-center mb-4">Salon Admin</h1>
+
+    <!-- Services Section -->
+    <div class="mb-5">
+      <h3>Services</h3>
+      <ul class="list-group mb-3" id="services-list">
+        <!-- Services will be added dynamically in JS -->
+      </ul>
+      <form id="add-service-form" class="row g-3">
+        <div class="col-md-4">
+          <input type="text" class="form-control" id="service-name" placeholder="Service Name" required>
+        </div>
+        <div class="col-md-2">
+          <input type="number" class="form-control" id="service-price" placeholder="Price" required>
+        </div>
+        <div class="col-md-2">
+          <input type="number" class="form-control" id="service-duration" placeholder="Duration (mins)" required>
+        </div>
+        <div class="col-md-4">
+          <select class="form-select" id="service-staff" multiple >
+            <!-- Options will be added dynamically in JS -->
+          </select>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-success">Add Service</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Staff Members Section -->
+    <div class="mb-5">
+      <h3>Staff Members</h3>
+      <ul class="list-group mb-3" id="staff-list">
+        <!-- Staff members will be added dynamically in JS -->
+      </ul>
+      <form id="add-staff-form" class="row g-3">
+        <div class="col-md-6">
+          <input type="text" class="form-control" id="staff-name" placeholder="Staff Name" required>
+        </div>
+        <div class="col-md-6">
+          <select class="form-select" id="staff-services" multiple >
+            <!-- Options will be added dynamically in JS -->
+          </select>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-success">Add Staff Member</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Appointments Section -->
+    <div>
+      <h3>Appointments</h3>
+      <ul class="list-group mb-3" id="appointments-list">
+        <!-- Appointments will be added dynamically in JS -->
+      </ul>
+      <form id="create-appointment-form" class="row g-3">
+        <div class="col-md-3">
+          <select class="form-select" id="appointment-service" required>
+            <!-- Service options will be added dynamically in JS -->
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" id="appointment-staff" required>
+            <!-- Staff options will be added dynamically in JS -->
+          </select>
+        </div>
+        <div class="col-md-3">
+          <input type="datetime-local" class="form-control" id="appointment-time" required>
+        </div>
+        <div class="col-md-3">
+          <input type="number" class="form-control" id="appointment-price" placeholder="Price" required>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-success">Create Appointment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const addServiceForm = document.getElementById('add-service-form');
+    const addStaffForm = document.getElementById('add-staff-form');
+
+    addServiceForm.addEventListener('submit', addservice);
+    addStaffForm.addEventListener('submit', addstaff);
+    document.addEventListener('DOMContentLoaded',getDetails);
+
+    function addservice(event){
+      event.preventDefault();
+      const token = localStorage.getItem('token');
+      const name = document.getElementById('service-name').value;
+      const price = document.getElementById('service-price').value;
+      const duration = document.getElementById('service-duration').value;
+      const staff = document.getElementById('service-staff').value;
+      const data = {
+        name,price,duration,staff
+      }
+      console.log(data);
+
+      axios.post('http://localhost:3000/admin/addservice', data,{headers: { "authorisation": token }})
+      .then(response=> {
+        alert(response.data.message);
+      })
+      .catch(err => console.log(err));
+    }
+
+    function getDetails(){
+      const token = localStorage.getItem('token');
+      axios.get('http://localhost:3000/admin/getDetails',{headers: { "authorisation": token }})
+      .then(response => {
+        populateDetails(response.data.services,response.data.availableStaff);
+      })
+      .catch(err=> {
+        console.log(err)
+      })
+    }
+
+    function addstaff(event){
+      event.preventDefault();
+      const token = localStorage.getItem('token');
+      const name = document.getElementById('staff-name').value;
+      const servicesSelect = document.getElementById('staff-services');
+      const services = Array.from(servicesSelect.selectedOptions).map(option => option.value);
+      const data = {
+        name,services
+      }
+      console.log(data);
+
+      axios.post('http://localhost:3000/admin/addstaff', data,{headers: { "authorisation": token }})
+      .then(response=> {
+        alert(response.data.message);
+      })
+      .catch(err => console.log(err));
+    }
+
+    function populateDetails(services,staff){
+      const servicesSelect = document.getElementById('staff-services');
+      const staffSelect = document.getElementById('service-staff');
+      
+      services.forEach(element => {
+        const option = document.createElement("option");
+        option.textContent = element.name;
+        option.value = element.name;
+        servicesSelect.appendChild(option);
+      });
+
+      staff.forEach(element => {
+        const option = document.createElement("option");
+        option.textContent = element.name;
+        option.value = element.name;
+        staffSelect.appendChild(option);
+      });
+
+      
+
+    }
+  </script>
+</body>
+</html>

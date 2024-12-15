@@ -1,0 +1,22 @@
+{
+  "name": "salonapp",
+  "version": "1.0.0",
+  "description": "salon management",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "author": "Akshay Sudhakar",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "luxon": "^3.5.0",
+    "mysql2": "^3.11.5",
+    "sequelize": "^6.37.5",
+    "stripe": "^17.4.0"
+  }
+}
