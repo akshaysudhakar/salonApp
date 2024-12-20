@@ -1,20 +1,20 @@
 const Sequelize = require('sequelize')
 const sequelize = require('./../util/database');
 
-const staff_model = sequelize.define('staff', {
+const feedback_model = sequelize.define('feedback', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true
     },
-    name :{
-        type : Sequelize.STRING,
+    review :{
+        type : Sequelize.TEXT,
         allowNull : false,
     },
-    email :{
-        type : Sequelize.STRING,
-        allowNull : false,
+    reply :{
+        type : Sequelize.TEXT,
+        allowNull : true,
     }
 })
 
-module.exports = staff_model;
+module.exports = feedback_model;

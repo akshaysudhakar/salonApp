@@ -43,6 +43,7 @@ exports.addStaff = async (req,res)=> {
     const userId = req.user.id;
     const data =  {
         name : req.body.name,
+        email : req.body.email
       }
     const services = req.body.services;
     try{

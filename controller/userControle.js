@@ -1,8 +1,10 @@
 const bcrypt = require('bcrypt');
+const Sequelize = require('sequelize');
 
 const service = require('./../model/servicesModel');
 const appointment = require('./../model/appointmentModel');
 const staff = require('./../model/staffModel');
+const feedback = require('./../model/feedbackModel');
 
 
 const user = require('./../model/userModel')
@@ -34,7 +36,9 @@ exports.signUp = async (req,res,next)=>{
 exports.login = async (req,res,next) =>{
     const data = req.body
     try{ 
-        const userToLogin = await user.findOne({where:{email : data.email}})
+        const userToLogin = await user.findOne({where:{email : data.email}});
+
+        const stylist = await staff.findOne({where : {email : data.email }});
 
         if(!userToLogin){
             return res.status(404).json({message : "user not found"})
@@ -46,6 +50,10 @@ exports.login = async (req,res,next) =>{
             const dataToSend = {message : "login successful" , token : userToken, name :userToLogin.name};
             if(userToLogin.isAdmin === true){
                 dataToSend.isAdmin = true;
+            }
+            if(stylist){
+                console.log('is a staff',data.email,stylist);
+                dataToSend.isStaff = true;
             }
             return res.status(200).json(dataToSend)   
         }
@@ -65,7 +73,7 @@ exports.getDetails = async (req,res)=> {
         const availableServices = await service.findAll();
 
         const userAppointments = await appointment.findAll({
-            where: { userId }, 
+            where: { userId, payment : true}, 
             include: [
               {
                 model: staff, 
@@ -78,7 +86,32 @@ exports.getDetails = async (req,res)=> {
             ],
           });
 
-          return res.status(200).json({services : availableServices,userAppointments : userAppointments});
+          const userFeedbacks = await feedback.findAll({
+            where: { userId: userId }, 
+            include: {
+              model: user, 
+              attributes: ['name'], 
+            },
+          });
+
+          const feedbacks = await feedback.findAll({
+            include: {
+              model: user,
+              attributes: ['name'],
+              where: {
+                id: {
+                  [Sequelize.Op.ne]: userId, 
+                },
+              },
+            },
+            limit: 15,
+            order: [['createdAt', 'DESC']],
+          });
+
+          return res.status(200).json({
+            services : availableServices,userAppointments : userAppointments,
+            userFeedbacks : userFeedbacks, feedbacks : feedbacks
+        });
     }
     catch(err){
         console.log(err)

@@ -50,6 +50,9 @@
           <input type="text" class="form-control" id="staff-name" placeholder="Staff Name" required>
         </div>
         <div class="col-md-6">
+          <input type="text" class="form-control" id="staff-email" placeholder="Staff Email" required>
+        </div>
+        <div class="col-md-6">
           <select class="form-select" id="staff-services" multiple >
             <!-- Options will be added dynamically in JS -->
           </select>
@@ -134,10 +137,11 @@
       event.preventDefault();
       const token = localStorage.getItem('token');
       const name = document.getElementById('staff-name').value;
+      const email = document.getElementById('staff-email').value;
       const servicesSelect = document.getElementById('staff-services');
       const services = Array.from(servicesSelect.selectedOptions).map(option => option.value);
       const data = {
-        name,services
+        name,email,services
       }
       console.log(data);
 

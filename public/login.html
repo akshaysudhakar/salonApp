@@ -55,9 +55,15 @@
             const userName = response.data.name;
             if(response.data.isAdmin){
               localStorage.setItem("isAdmin","true")
+              localStorage.setItem('isStaff',"true")
+            }
+            else if(response.data.isStaff){
+              localStorage.setItem('isStaff',"true")
+              localStorage.removeItem('isAdmin');
             }
             else{
-              localStorage.removeItem('isAdmin')
+              localStorage.removeItem('isAdmin');
+              localStorage.removeItem('isStaff');
             }
             localStorage.setItem("token" ,token)
             localStorage.setItem("username",userName)

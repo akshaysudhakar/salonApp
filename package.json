@@ -11,12 +11,16 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.3",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "luxon": "^3.5.0",
     "mysql2": "^3.11.5",
+    "ngrok": "^5.0.0-beta.2",
+    "node-cron": "^3.0.3",
     "sequelize": "^6.37.5",
+    "sib-api-v3-sdk": "^8.5.0",
     "stripe": "^17.4.0"
   }
 }

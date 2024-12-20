@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salon Staff</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
+</head>
+<body>
+    <div class="container my-5">
+        <h1 class="text-center">Staff Page</h1>
+
+        <!-- Skills Section -->
+        <div class="mb-4">
+            <h3>Your Skills</h3>
+            <ul class="list-group" id="skills-list"></ul>
+        </div>
+
+        <!-- Appointments Section -->
+        <div class="mb-4">
+            <h3>Your Appointments</h3>
+            <ul class="list-group" id="appointments-list"></ul>
+        </div>
+
+        <!-- Reviews and Feedback Section -->
+        <div class="mb-4">
+            <h3>Reviews and Feedback</h3>
+            <div id="reviews-section">
+                <!-- Reviews will be appended here -->
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', getDetails);
+
+      function getDetails(){
+        const token = localStorage.getItem('token')
+        console.log(token);
+        axios.get('http://localhost:3000/staff/getDetails',{headers: { "authorisation": token }})
+        .then(response => {
+          console.log(response.data);
+          populateDetails(response.data.staffDetails);
+          populateReviews(response.data.latestReviews);
+        })
+        .catch(err => {
+          console.log(err)
+        })
+      }
+
+      function populateDetails(details){
+        const skillList = document.getElementById('skills-list');
+        const appointmentList = document.getElementById('appointments-list');
+
+        const appointments = details.appointments;
+        const skills = details.services
+
+        skills.forEach(element => {
+          let li = document.createElement('li')
+
+          li.innerHTML = `${element.name} &nbsp ${element.duration}minutes &nbsp ${element.price}`
+
+          skillList.appendChild(li);
+        });
+        appointments.forEach(element => {
+          let li = document.createElement('li')
+
+          li.innerHTML = `${element.appointment_date} &nbsp ${element.start_time} &nbsp ${element.price} &nbsp ${element.service.name} &nbsp ${element.user.name}`
+
+          appointmentList.appendChild(li);
+        });
+      }
+
+      function populateReviews(feedbacks){
+      const riviewSection = document.getElementById('reviews-section');
+      feedbacks.forEach(element => {
+        const liUser = document.createElement('li');
+        const unameAndReviewDiv = document.createElement('div');
+        const revp = document.createElement('p');
+        const repp = document.createElement('p');
+        const uname = document.createElement('h6');
+
+        uname.textContent = element.user.name;
+        revp.textContent = element.review;
+
+        if(element.reply){
+          repp.innerHTML  = `The staff has replied to the review <br> ${element.reply}`;
+        }
+        if(!element.reply){
+          const textarea = document.createElement('textarea');
+          const button = document.createElement('button');
+          button.textContent = 'Reply'
+          button.onclick = ()=> {
+            const token = localStorage.getItem('token');
+            axios.post('http://localhost:3000/staff/postReply',{reply : textarea.value, id:element.id},{headers: { "authorisation": token }})
+            .then(response=> {
+              alert(response.data.message)
+              console.log(response.data)
+            })
+            .catch(err=> {
+              alert(err.response.data.message);
+              console.log(err)
+            })
+          }
+          repp.appendChild(textarea);
+          repp.appendChild(button);
+        }   
+        uname.style.display = 'inline';
+        uname.style.color = 'blue';
+        uname.style.marginRight = '10px'; 
+        revp.style.display = 'inline';
+        unameAndReviewDiv.append(uname, revp);
+
+        liUser.appendChild(unameAndReviewDiv);
+        liUser.appendChild(repp);
+        riviewSection.appendChild(liUser);
+      });}
+
+    </script>
+</body>
+</html>

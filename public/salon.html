@@ -7,6 +7,7 @@
   <!-- Bootstrap CSS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="salonStyle.css">
 </head>
 <body>
   <div class="container my-5">
@@ -15,6 +16,9 @@
     <!-- Admin Page Button -->
     <div class="text-end mb-4">
       <button id="admin-page-btn" class="btn btn-secondary" style="display: none;">Admin Page</button>
+    </div>
+    <div class="text-end mb-4">
+      <button id="staff-page-btn" class="btn btn-secondary" style="display: none;">Staff Page</button>
     </div>
 
     <!-- Services List -->
@@ -36,18 +40,22 @@
       <h3>Appointments</h3>
       <div id="appointments-container">
         <!-- Upcoming Appointments -->
-        <h5>Upcoming Appointments</h5>
-        <ul class="list-group mb-4" id="upcoming-appointments">
+        <h5> Appointments</h5>
+        <ul class="list-group mb-4" id="appointments">
           <!-- Upcoming appointments will be added dynamically in JS -->
-        </ul>
-
-        <!-- Previous Appointments -->
-        <h5>Previous Appointments</h5>
-        <ul class="list-group" id="previous-appointments">
-          <!-- Previous appointments will be added dynamically in JS -->
         </ul>
       </div>
     </div>
+  </div>
+  <div id="reviews-section" style="text-align: center; margin: 20px 0;">
+    <h2 class="text-center mb-4">Post Your Review</h2>
+    <div id="review-input">
+      <textarea id="review-text" placeholder="Write your review here..." style="width: 400px; height: 100px; padding: 8px; resize: none;"></textarea>
+      <button id="post-review-btn" class="btn btn-secondary">Post</button>
+    </div>
+    <ul id="reviews-list" class="list-group mb-4">
+      <!-- Reviews and replies will be dynamically populated here -->
+    </ul>
   </div>
 
   <!-- Bootstrap JS -->
@@ -55,11 +63,21 @@
   <!-- Your custom JS will go here -->
   <script>
     const adminPageButton = document.getElementById('admin-page-btn');
+    const staffPageButton = document.getElementById('staff-page-btn');
+    const postReviewBtn = document.getElementById('post-review-btn');
 
     document.addEventListener('DOMContentLoaded', getDetails)
     adminPageButton.addEventListener('click', ()=> {window.location.href = "/salonAdmin.html"});
+    staffPageButton.addEventListener('click',()=> {window.location.href = '/salonStaff.html'});
+    postReviewBtn.addEventListener('click',postReview)
 
     const isAdmin = localStorage.getItem('isAdmin');
+    const isStaff = localStorage.getItem('isStaff');
+
+    if (isStaff === "true"){
+        staffPageButton.style.display = 'inline-block';
+    }
+
     if (isAdmin === "true"){
         adminPageButton.style.display = 'inline-block';
     }
@@ -70,6 +88,8 @@
       .then(response => {
         console.log(response.data)
         populateServices(response.data.services);
+        populateAppointments(response.data.userAppointments);
+        populateReviews(response.data.userFeedbacks,response.data.feedbacks);
       })
       .catch(err => console.log(err))
     }
@@ -93,9 +113,94 @@
       });
     }
 
-    
-    // Example of dynamically adding services and appointments in JS:
-    // document.getElementById('services-list').innerHTML += '<li class="list-group-item d-flex justify-content-between align-items-center"><span>Haircut</span><button class="btn btn-primary btn-sm">Book Appointment</button></li>';
+    function populateAppointments(appointments){
+      const appointmentList = document.getElementById('appointments');
+      appointments.forEach(element => {
+        const li = document.createElement('li');
+        const button = document.createElement('button');
+
+        button.textContent = 'cancel Appointment';
+
+        li.textContent = `${element.service.name}____${element.staff.name}____${element.appointment_date}____${element.start_time}____Rs.${element.service.price}`;
+        
+        button.addEventListener('click', () => {
+          const token = localStorage.getItem('token');
+          axios.get('http://localhost:3000/appointment/cancel',{headers: {"authorisation": token ,"appid":element.id}})
+          .then(response => {
+            alert(response.data.message);
+          })
+          .catch(err => console.log(err))
+      });
+        li.appendChild(button);
+
+        appointmentList.appendChild(li); 
+      });
+    }
+
+    function populateReviews(userFeedbacks,feedbacks){
+      const riviewList = document.getElementById('reviews-list');
+      userFeedbacks.forEach(element => {
+        const liUser = document.createElement('li');
+        const unameAndReviewDiv = document.createElement('div');
+        const revp = document.createElement('p');
+        const repp = document.createElement('p');
+        const uname = document.createElement('h6');
+
+        uname.textContent = element.user.name;
+        revp.textContent = element.review;
+        if(element.reply){
+          repp.innerHTML  = `The staff has replied to your review <br> ${element.reply}`;
+        }
+      
+        uname.style.display = 'inline';
+        uname.style.color = 'blue'
+        uname.style.marginRight = '10px'; 
+        revp.style.display = 'inline';
+        unameAndReviewDiv.append(uname, revp);
+
+        liUser.appendChild(unameAndReviewDiv);
+        liUser.appendChild(repp);
+        riviewList.appendChild(liUser);
+      });
+
+      feedbacks.forEach(element => {
+        const li = document.createElement('li');
+        const unameAndReviewDiv = document.createElement('div');
+        const revp = document.createElement('p');
+        const repp = document.createElement('p');
+        const uname = document.createElement('h6');
+
+        uname.textContent = element.user.name;
+        revp.textContent = element.review;
+        if(element.reply){
+          repp.innerHTML  = `The staff has replied to your review <br> ${element.reply}`;
+        }
+
+        uname.style.display = 'inline';
+        uname.style.color = 'blue'
+        uname.style.marginRight = '10px'; 
+        revp.style.display = 'inline';
+        unameAndReviewDiv.append(uname, revp);
+
+        li.appendChild(unameAndReviewDiv);
+        li.appendChild(repp);
+        riviewList.appendChild(li);
+      });
+    }
+
+    function postReview(){
+      const token = localStorage.getItem('token');
+      const review = document.getElementById('review-text').value;
+      axios.post('http://localhost:3000/staff/postReview',{review},{headers: {"authorisation": token}})
+      .then( response => {
+        console.log(response.data);
+        alert(response.data.message)
+      })
+      .catch(err=> {
+        console.log(err)
+        alert(err.response.data.message)
+      });
+    }
   </script>
 </body>
 </html>

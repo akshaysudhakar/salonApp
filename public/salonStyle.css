@@ -1,0 +1,149 @@
+/* General Reset */
+body, h1, h3, ul, li, button {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif; /* Clean, modern font */
+  }
+  
+  /* Body Styling */
+  body {
+    background-color: #f7f7f5; /* Light neutral background */
+    color: #333; /* Dark, professional text */
+    line-height: 1.5;
+    font-size: 16px;
+    padding: 20px;
+  }
+  
+  /* Container */
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Header */
+  h1 {
+    font-size: 2.5rem;
+    text-align: center;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 20px;
+  }
+  
+  /* Section Titles */
+  h3 {
+    font-size: 1.8rem;
+    color: #34495e;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 5px;
+  }
+  
+  /* Lists */
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  ul.list-group {
+    padding: 0;
+  }
+  
+  ul.list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f9f9f9;
+    border: 1px solid #e1e1e1;
+    padding: 15px 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    transition: transform 0.2s, background-color 0.3s;
+  }
+  
+  ul.list-group-item:hover {
+    background-color: #e8f0fe;
+    transform: scale(1.01); /* Subtle hover effect */
+  }
+  
+  /* Button Styling */
+  button {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    white-space: nowrap; /* Prevent wrapping */
+  }
+  
+  /* Admin Page Button */
+  #admin-page-btn {
+    background-color: #1abc9c;
+    color: white;
+    font-size: 1rem;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+  }
+  #admin-page-btn:hover {
+    background-color: #16a085;
+  }
+  
+  /* Book Appointment Button */
+  #services-list button {
+    background-color: #3498db;
+    color: white;
+  }
+  #services-list button:hover {
+    background-color: #2980b9;
+  }
+  
+  /* Cancel Appointment Button */
+  #appointments button {
+    background-color: #e74c3c;
+    color: white;
+  }
+  #appointments button:hover {
+    background-color: #c0392b;
+  }
+  
+  /* Typography in List Items */
+  ul.list-group-item span {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #2d3436;
+    flex-grow: 1;
+    margin-right: 10px;
+  }
+  
+  /* Appointments Container */
+  #appointments-container {
+    margin-top: 20px;
+    padding: 20px;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    ul.list-group-item {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    ul.list-group-item button {
+      margin-top: 10px;
+      align-self: flex-end;
+    }
+  }
+  
+  

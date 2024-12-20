@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Book Appointment</title>
+  <link rel="stylesheet" href="salonStyle.css">
 </head>
 <body>
   <h1>Book Your Appointment</h1>
@@ -90,7 +91,10 @@
         axios.post('http://localhost:3000/user/getStylistsSlots',{date: selectedDate, stylist :stylistName }, { headers: { "authorisation": token } })
           .then(response => {
             console.log(response.data)
-            const bookedSlots = response.data; // Example: ["11:00 AM", "2:00 PM", "3:00 PM"]
+            const bookedSlots = [];
+            response.data.forEach(element => {
+              bookedSlots.push(element.start_time)
+            }); 
             const allSlots = [];
             const startTime = 11; // Starting hour (11 AM)
             const endTime = 22; // Ending hour (10 PM)
@@ -98,9 +102,10 @@
             // Generate all slots from 11 AM to 10 PM (1-hour intervals)
             for (let hour = startTime; hour < endTime; hour++) {
               if (hour === 13) continue; // Skip 1 PM to 2 PM (Lunch hour)
-              const slot = `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
-              if (!bookedSlots.includes(slot)) { // Include only if not in booked slots
-                allSlots.push(slot);
+              const slot = `${hour}:00:00`;
+              if (!bookedSlots.includes(slot)) { 
+                const customizedSlot = `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`
+                allSlots.push(customizedSlot);
               }
             }
 

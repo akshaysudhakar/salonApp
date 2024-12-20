@@ -8,6 +8,7 @@ const secret_key = process.env.USERID_SECRET_KEY;
 
 const verifyToken  = (req,res,next)=> {
     const token = req.headers.authorisation;
+    console.log(token)
     jwt.verify(token,secret_key, (error,decoded)=>{
         if (error){
             console.log(error)
